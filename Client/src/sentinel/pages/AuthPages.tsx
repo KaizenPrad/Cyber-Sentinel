@@ -3,13 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Reveal } from "@/src/components/Reveal";
 import { StarButton } from "@/src/components/StarButton";
 import { useAuth } from "../auth";
-import { DEMO_EMAIL, DEMO_PASSWORD } from "../demo";
 import { inputCls, labelCls } from "../ui";
 
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("demo@cybersentinel.local");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -50,21 +49,6 @@ export function LoginPage() {
           <StarButton size="md" type="submit" disabled={busy} className="w-full">
             {busy ? "SIGNING IN…" : "SIGN IN"}
           </StarButton>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              setEmail(DEMO_EMAIL);
-              setPassword(DEMO_PASSWORD);
-              setError(null);
-            }}
-            className="w-full rounded-full border border-dashed border-white/20 px-5 py-2 text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white"
-          >
-            No backend? Fill demo account
-          </button>
-          <p className="text-center font-mono text-xs leading-relaxed text-white/40">
-            DEMO LOGIN · {DEMO_EMAIL} · {DEMO_PASSWORD}
-          </p>
           <p className="text-center text-base text-muted-foreground">
             No workspace? <Link to="/register" className="text-white underline underline-offset-4">Create one</Link>
           </p>

@@ -51,9 +51,10 @@ export const listIncidents = asyncHandler(async (req, res) => {
 
 // This is the getIncident function that gets a single incident with remediation logs and signals
 export const getIncident = asyncHandler(async (req, res) => {
-  // Query incident by ID and organization
+  // Query incident by ID and organization, including the assignee email
   const r = await pool.query( // this line looks up one incident in your organization
-    "SELECT * FROM incidents WHERE id=$1 AND organization_id=$2",
+    `SELECT i.*, u.email AS assignee_email FROM incidents i LEFT JOIN users u ON u.id = i.assignee_id
+     WHERE i.id=$1 AND i.organization_id=$2`,
     [req.params.id, req.user.organizationId], // this line passes the incident id and your organization id
   );
   // If not found, return 404

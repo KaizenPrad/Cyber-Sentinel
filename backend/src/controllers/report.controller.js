@@ -24,10 +24,14 @@ export const getGraphOnly = asyncHandler(async (req, res) => {
 // This is the getReport function that returns a security report with various statistics
 export const getReport = asyncHandler(async (req, res) => {
   const org = req.user.organizationId; // Here we get the organization id from the logged in user
-  // Parse start date from query, default to 7 days ago
-  const start = req.query.start ? new Date(req.query.start) : new Date(Date.now() - 7 * 864e5); // Here we read the start date or use 7 days ago
-  // Parse end date from query, default to now
-  const end = req.query.end ? new Date(req.query.end) : new Date(); // Here we read the end date or use right now
+  // Parse start date from query, default to 7 days ago (invalid dates fall back to defaults instead of 500ing)
+  const parseDate = (value, fallback) => { // this line parses one date query param safely
+    if (!value) return fallback; // this line uses the default when nothing was sent
+    const d = new Date(value); // this line tries to parse the sent value
+    return Number.isNaN(d.getTime()) ? fallback : d; // this line falls back when the value is not a real date
+  };
+  const start = parseDate(req.query.start, new Date(Date.now() - 7 * 864e5)); // Here we read the start date or use 7 days ago
+  const end = parseDate(req.query.end, new Date()); // Here we read the end date or use right now
   // Get detection counts grouped by type
   const byType = (await pool.query( // this line counts detections grouped by type
     `SELECT detection_type, COUNT(*) c FROM detections WHERE organization_id=$1 AND created_at BETWEEN $2 AND $3 GROUP BY 1`,

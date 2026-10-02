@@ -1,31 +1,6 @@
 import axios from "axios";
-import {
-  demoAddRemediation,
-  demoDetection,
-  demoDetections,
-  demoGraph,
-  demoIncident,
-  demoIncidents,
-  demoPromoteDetection,
-  demoReport,
-  demoSessionUser,
-  demoSignals,
-  demoStats,
-  demoUpdateIncident,
-} from "./demo";
 
 const TOKEN_KEY = "cybersentinel-token";
-
-/** Demo session token — when present, all data below serves local mock data. */
-export const DEMO_TOKEN = "cybersentinel-demo-token";
-
-export function isDemoMode(): boolean {
-  try {
-    return localStorage.getItem(TOKEN_KEY) === DEMO_TOKEN;
-  } catch {
-    return false;
-  }
-}
 
 // Same-origin /api via Vite proxy by default; override with VITE_API_URL for production.
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || "";
@@ -135,7 +110,6 @@ export interface Report {
 /* ---------- endpoints ---------- */
 
 export async function fetchStats(): Promise<Stats> {
-  if (isDemoMode()) return demoStats();
   const r = await api.get("/monitor/stats");
   return r.data.data as Stats;
 }
@@ -150,7 +124,6 @@ export interface SignalQuery {
 }
 
 export async function fetchSignals(q: SignalQuery): Promise<Paginated<Signal>> {
-  if (isDemoMode()) return demoSignals(q);
   const params: Record<string, string | number> = {
     page: q.page ?? 1,
     limit: q.limit ?? 20,
@@ -164,7 +137,6 @@ export async function fetchSignals(q: SignalQuery): Promise<Paginated<Signal>> {
 }
 
 export async function fetchGraph(window: "1h" | "24h" | "7d"): Promise<GraphData> {
-  if (isDemoMode()) return demoGraph(window);
   const r = await api.get("/graph", { params: { window } });
   return r.data.data as GraphData;
 }
@@ -175,7 +147,6 @@ export async function fetchDetections(params?: {
   page?: number;
   limit?: number;
 }): Promise<Paginated<Detection>> {
-  if (isDemoMode()) return demoDetections(params);
   const clean: Record<string, string | number> = {};
   if (params?.type) clean.type = params.type;
   if (params?.severity) clean.severity = params.severity;
@@ -186,13 +157,11 @@ export async function fetchDetections(params?: {
 }
 
 export async function fetchDetection(id: string): Promise<Detection> {
-  if (isDemoMode()) return demoDetection(id);
   const r = await api.get(`/detections/${id}`);
   return r.data.data as Detection;
 }
 
 export async function promoteDetection(id: string): Promise<Incident> {
-  if (isDemoMode()) return demoPromoteDetection(id);
   const r = await api.post(`/detections/${id}/promote`);
   return r.data.data as Incident;
 }
@@ -203,7 +172,6 @@ export async function fetchIncidents(params?: {
   page?: number;
   limit?: number;
 }): Promise<Paginated<Incident>> {
-  if (isDemoMode()) return demoIncidents(params);
   const clean: Record<string, string | number> = {};
   if (params?.status) clean.status = params.status;
   if (params?.severity) clean.severity = params.severity;
@@ -214,7 +182,6 @@ export async function fetchIncidents(params?: {
 }
 
 export async function fetchIncident(id: string): Promise<Incident> {
-  if (isDemoMode()) return demoIncident(id);
   const r = await api.get(`/incidents/${id}`);
   return r.data.data as Incident;
 }
@@ -223,7 +190,6 @@ export async function updateIncident(
   id: string,
   body: { status?: Incident["status"]; assigneeId?: string | null },
 ): Promise<Incident> {
-  if (isDemoMode()) return demoUpdateIncident(id, body);
   const r = await api.patch(`/incidents/${id}`, body);
   return r.data.data as Incident;
 }
@@ -232,7 +198,6 @@ export async function addRemediation(
   id: string,
   body: { action: string; notes?: string },
 ): Promise<Remediation> {
-  if (isDemoMode()) return demoAddRemediation(id, body);
   const r = await api.post(`/incidents/${id}/remediation`, body);
   return r.data.data as Remediation;
 }
@@ -241,7 +206,6 @@ export async function fetchReport(params?: {
   start?: string;
   end?: string;
 }): Promise<Report> {
-  if (isDemoMode()) return demoReport();
   const clean: Record<string, string> = {};
   if (params?.start) clean.start = params.start;
   if (params?.end) clean.end = params.end;
@@ -272,12 +236,7 @@ export interface ApiKeyCreated {
   createdAt: string;
 }
 
-function demoApiKeysError(): Error {
-  return new Error("API keys need the live backend — start it and sign in again.");
-}
-
 export async function fetchApiKeys(): Promise<ApiKey[]> {
-  if (isDemoMode()) throw demoApiKeysError();
   const r = await api.get("/auth/api-keys");
   return r.data.data as ApiKey[];
 }
@@ -286,13 +245,11 @@ export async function createApiKey(body: {
   name: string;
   expiresInDays?: number;
 }): Promise<ApiKeyCreated> {
-  if (isDemoMode()) throw demoApiKeysError();
   const r = await api.post("/auth/api-keys", body);
   return r.data.data as ApiKeyCreated;
 }
 
 export async function revokeApiKey(id: string): Promise<void> {
-  if (isDemoMode()) throw demoApiKeysError();
   await api.delete(`/auth/api-keys/${id}`);
 }
 
@@ -309,13 +266,11 @@ export interface OrgMember {
 }
 
 export async function fetchMembers(): Promise<OrgMember[]> {
-  if (isDemoMode()) return [{ ...demoSessionUser, firstName: demoSessionUser.firstName, lastName: demoSessionUser.lastName, lastLoginAt: null, createdAt: new Date().toISOString() } as OrgMember];
   const r = await api.get("/auth/members");
   return r.data.data as OrgMember[];
 }
 
 export async function updateMemberRole(id: string, role: OrgMember["role"]): Promise<OrgMember> {
-  if (isDemoMode()) throw demoApiKeysError();
   const r = await api.patch(`/auth/members/${id}`, { role });
   return r.data.data as OrgMember;
 }

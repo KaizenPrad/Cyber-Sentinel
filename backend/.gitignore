@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# environment + secrets — NEVER commit. See .env.example.
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+logs/
+
+# OS + editor
+.DS_Store
+.vscode/*
+.idea/

@@ -42,7 +42,7 @@ export function ProfilePage() {
             </div>
             <div className="flex justify-between gap-4">
               <dt className="text-white/50">SIGN-IN METHOD</dt>
-              <dd className="text-white/80">{user.provider === "demo" ? "Demo session" : "Password"}</dd>
+              <dd className="text-white/80">{user.provider ? `SSO via ${user.provider}` : "Password"}</dd>
             </div>
           </dl>
         </div>

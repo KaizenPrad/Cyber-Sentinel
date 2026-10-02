@@ -20,7 +20,7 @@ External App pushes signals ──> POST /api/ingest ──> Normalize ──> S
 ## 1. Tech Stack (exact)
 
 **Backend `backend/package.json`:**
-`node ESM ("type":"module")`, `express@4.19.2`, `pg@8.12`, `jsonwebtoken@9`, `bcryptjs@2.4.3`, `zod@3.23`, `helmet@7`, `cors@2.8`, `morgan@1.10`, `express-rate-limit@7`, `cookie-parser@1.4`, `dotenv@16`, `nanoid@5`. Scripts: `dev: node --watch server.js`, `start: node server.js`, `db:migrate: node src/db/migrate.js`, `db:seed: node src/db/seed.js`. Entry `backend/server.js` → `src/app.js`, default port `3001` (`src/config/env.js`).
+`node ESM ("type":"module")`, `express@4.19.2`, `pg@8.12`, `jsonwebtoken@9`, `bcryptjs@2.4.3`, `zod@3.23`, `helmet@7`, `cors@2.8`, `morgan@1.10`, `express-rate-limit@7`, `cookie-parser@1.4`, `dotenv@16`, `nanoid@5`. Scripts: `dev: node --watch server.js`, `start: node server.js`, `db:migrate: node src/db/migrate.js`. Entry `backend/server.js` → `src/app.js`, port from `PORT` (`5000` in `.env`, code default `3001`).
 
 **Frontend `client/package.json`:**
 `react@19.3 + react-dom`, `react-router-dom@7.18`, `vite@6.3`, `@vitejs/plugin-react@4`, `tailwindcss@4 + @tailwindcss/vite`, `axios@1.20`, `recharts@3.10`, `vis-network@10.1`, `lucide-react@1.48`, `typescript@7`. Scripts: `dev: vite` (:5173), `build: tsc --noEmit && vite build`. Alias `@` → `client/` root (`vite.config.ts`). Dev proxy `/api → http://localhost:5000` (note: backend defaults to `3001` — set `PORT=5000` in dev or fix proxy/`VITE_API_URL`).
@@ -54,7 +54,7 @@ backend/
     routes/auth.route.js / ingest.route.js / monitor.route.js / graph.route.js
     routes/detection.route.js / incident.route.js / report.route.js
     models/user.model.js, signal.model.js, detection.model.js, incident.model.js # thin, mostly unused
-    db/schema.sql, db/migrate.js, db/seed.js
+    db/schema.sql, db/migrate.js
     utils/apiResponse.js, utils/asyncHandler.js
 
 client/
@@ -84,20 +84,19 @@ client/
 cd backend && npm install
 cp .env.example .env   # then fill DATABASE_URL + JWT_SECRET (see §4)
 npm run db:migrate      # runs src/db/schema.sql
-npm run db:seed         # creates Demo SOC + demo@cybersentinel.local / Demo1234! + 3 devices
-npm run dev             # :3001 (or PORT=5000 to match vite proxy)
+npm run dev             # :5000 (matches vite proxy)
 
-# 2. Frontend (new terminal)
-cd client && npm install
-cp .env.example .env   # set VITE_API_URL=http://localhost:3001 (or 5000) — empty = use /api proxy
-npm run dev             # :5173 → open http://localhost:5173, login with demo account
+# 2. Frontend (new terminal, or `npm run dev` from repo root for both)
+cd Client && npm install
+cp .env.example .env   # VITE_API_URL=http://localhost:5000 — empty = use /api proxy
+npm run dev             # :5173 → open http://localhost:5173, Register a workspace
 
 # 3. Verify
-curl http://localhost:3001/api/health
+curl http://localhost:5000/api/health
 # {"success":true,"data":{"status":"ok","service":"cybersentinel"}}
 ```
 
-Seed login: `demo@cybersentinel.local / Demo1234!` → lands on `/monitor`.
+First run: open the app and **Register** — the first account creates your organization as OWNER → lands on `/monitor`.
 
 ---
 
@@ -232,7 +231,7 @@ Demo (2 min): `Home(score,critical) → Monitor(phish feed) → Graph(user→evi
 ## 10. Deploy + Troubleshoot
 
 * Frontend Vercel: set `VITE_API_URL=https://<backend>`, `npm run build` → `dist/`. Backend Railway/Render: set `PORT, FRONTEND_URL=https://<vercel>, DATABASE_URL, JWT_*`, `npm run db:migrate`, `npm start`. DB Neon.
-* Pitfalls: `PORT` vs proxy mismatch (5173 proxy →5000, backend default 3001) → set same; CORS fails if `FRONTEND_URL` wrong; `401` → missing Bearer/cookie or expired 1h JWT → re-login; `429` → rate limit; empty graph/report → no signals in window → re-ingest seed curl.
+* Pitfalls: backend `PORT` must match the frontend target (`5000` in both `.env` files by default); CORS fails if `FRONTEND_URL` wrong; `401` → missing Bearer/cookie or expired 1h JWT → re-login; `429` → rate limit; empty graph/report → no signals in window → ingest via POST /api/ingest first.
 
 ## 11. Glossary
 

@@ -137,7 +137,7 @@ CREATE INDEX IF NOT EXISTS idx_incidents_org_status ON incidents(organization_id
 CREATE TABLE IF NOT EXISTS remediation_logs (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT, -- unique log id
   incident_id TEXT NOT NULL REFERENCES incidents(id) ON DELETE CASCADE, -- which incident
-  user_id TEXT NOT NULL REFERENCES users(id), -- which analyst did it
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- which analyst did it, removed with their account
   action TEXT NOT NULL, -- what was done, e.g. Isolated host
   notes TEXT, -- extra details
   created_at TIMESTAMPTZ DEFAULT NOW() -- when the action was logged
@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS api_keys (
   key_hash TEXT NOT NULL UNIQUE, -- SHA256 of the real key, never the key itself
   key_prefix TEXT NOT NULL, -- first 12 chars like cs_live_xxx for fast lookup
   organization_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE, -- which org owns it
-  created_by TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- who created it
+  created_by TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- who created it, removed with their account
   last_used_at TIMESTAMPTZ, -- last time the key was used
   expires_at TIMESTAMPTZ, -- expiry time, null means never expires
   revoked_at TIMESTAMPTZ, -- revoke time, null means still active
