@@ -1,0 +1,17 @@
+{
+  "name": "cyber",
+  "version": "1.0.0",
+  "description": "> This README is written so a beginner developer can **rebuild a working clone from scratch** by following it. It documents the **actual code in `backend/` + `client/`**, not an ideal. Where code cuts corners for hackathon speed, it says so.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently -n backend,client -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix Client\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}
