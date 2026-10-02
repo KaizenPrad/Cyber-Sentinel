@@ -1,0 +1,88 @@
+/* CyberSentinel readability layer — sits on top of the CyberSentinel design
+   system (tokens, keyframes, components untouched). Enforces the
+   utilitarian scale: 16px body minimum, 12px+ UI labels, 44px targets. */
+
+/* Base: 16px minimum, comfortable measure and rhythm. */
+.sentinel-scale {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Tabular numerals for every data surface. */
+.sentinel-scale table,
+.sentinel-scale .tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Table fundamentals: roomy rows, sticky readable header, hover track. */
+.sentinel-scale table {
+  border-collapse: collapse;
+}
+.sentinel-scale tbody tr {
+  transition: background-color 150ms ease-out;
+}
+.sentinel-scale tbody tr:hover {
+  background-color: rgb(255 255 255 / 0.035);
+}
+
+/* 44px minimum touch targets for all button-like controls. */
+.sentinel-scale .star-button {
+  min-height: 44px;
+}
+.sentinel-scale button,
+.sentinel-scale select,
+.sentinel-scale input,
+.sentinel-scale a {
+  min-height: 0;
+}
+.sentinel-scale button:not(.star-button),
+.sentinel-scale select {
+  min-height: 44px;
+}
+.sentinel-scale input[type="text"],
+.sentinel-scale input[type="email"],
+.sentinel-scale input[type="password"],
+.sentinel-scale input[type="search"],
+.sentinel-scale input[type="date"] {
+  min-height: 48px;
+}
+.sentinel-scale input[type="range"] {
+  min-height: 44px;
+  height: 44px;
+  accent-color: #fff;
+}
+
+/* Accessible focus: thicker ring than the reference default. */
+.sentinel-scale :focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Form controls inherit the 16px body size (also stops iOS auto-zoom). */
+.sentinel-scale input,
+.sentinel-scale select,
+.sentinel-scale textarea {
+  font-size: 1rem;
+}
+
+/* Keep long identifiers readable without breaking layout. */
+.sentinel-scale .break-id {
+  overflow-wrap: anywhere;
+  font-size: 0.8125rem;
+}
+
+/* Legibility floor on small screens: never drop below 15px body. */
+@media (max-width: 40rem) {
+  .sentinel-scale {
+    font-size: 0.9375rem;
+  }
+}
+
+/* Honor reduced motion exactly like the reference system. */
+@media (prefers-reduced-motion: reduce) {
+  .sentinel-scale * {
+    animation-duration: 0.01s;
+    transition-duration: 0.01s;
+  }
+}
