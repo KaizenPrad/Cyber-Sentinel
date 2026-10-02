@@ -1,4 +1,4 @@
-# CyberSentinel — AI Cyber Threat Detection (Clone-Complete Guide)
+# CyberSentinel — AI Cyber Threat Detection
 
 > This README is written so a beginner developer can **rebuild a working clone from scratch** by following it. It documents the **actual code in `backend/` + `client/`**, not an ideal. Where code cuts corners for hackathon speed, it says so.
 
