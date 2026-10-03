@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "concurrently -n backend,client -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix Client\"",
-    "build": "npm install --prefix backend && npm install --include=dev --prefix Client && npm run build --prefix Client",
+    "build": "npm install --prefix backend && npm install --include=dev --prefix Client && npm run build --prefix Client && npm run db:migrate --prefix backend",
     "start": "npm start --prefix backend",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
