@@ -124,6 +124,6 @@ export interface SiteData {
   TESTIMONIALS: Testimonial[];
   FINAL_CTA: { title: [string, string]; description: string; avatars: string[] };
   FOOTER_BLURB: string;
-  FOOTER_SOCIALS: string[];
+  FOOTER_SOCIALS: { label: string; href: string }[];
   FOOTER_COLUMNS: FooterColumn[];
 }

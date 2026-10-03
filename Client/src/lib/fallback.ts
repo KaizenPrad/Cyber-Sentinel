@@ -446,43 +446,48 @@ export const FINAL_CTA = {
 export const FOOTER_BLURB =
   "AI agent scheduling with durable state. Automate recurring work across every tool, trigger, and run.";
 
-export const FOOTER_SOCIALS = ["Twitter", "GitHub", "LinkedIn"] as const;
+export const FOOTER_SOCIALS = [
+  { label: "GitHub — NivarOO", href: "https://github.com/NivarOO" },
+  { label: "GitHub — KaizenPrad", href: "https://github.com/KaizenPrad" },
+  {
+    label: "LinkedIn — Rahul Gupta",
+    href: "https://www.linkedin.com/in/rahul-gupta-26768532a/?isSelfProfile=true",
+  },
+  {
+    label: "LinkedIn — Pradyumn Dwivedi",
+    href: "https://www.linkedin.com/in/pradyumn-dwivedi-a6717834b/",
+  },
+] as const;
 
 
 export const FOOTER_COLUMNS: FooterColumn[] = [
   {
-    heading: "Product",
+    heading: "Pages",
     links: [
-      { label: "Scheduling patterns", href: "#features" },
-      { label: "How scheduling works", href: "#how-it-works" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "Connected systems", href: "#integrations" },
+      { label: "Home", href: "/" },
+      { label: "Docs", href: "/docs" },
+      { label: "Sign in", href: "/login" },
+      { label: "Register", href: "/register" },
     ],
   },
   {
-    heading: "Developers",
+    heading: "Platform",
     links: [
-      { label: "Documentation", href: "#developers" },
-      { label: "Scheduler SDK", href: "#" },
-      { label: "API Reference", href: "#developers" },
-      { label: "Status", href: "#" },
+      { label: "Threat Monitor", href: "/monitor" },
+      { label: "Network Graph", href: "/graph" },
+      { label: "AI Detection", href: "/detection" },
+      { label: "Incidents", href: "/incidents" },
+      { label: "Security Report", href: "/report" },
     ],
   },
   {
-    heading: "Company",
+    heading: "Sections",
     links: [
-      { label: "About", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Careers", href: "#", badge: "Hiring" },
-      { label: "Contact", href: "#" },
-    ],
-  },
-  {
-    heading: "Legal",
-    links: [
-      { label: "Privacy", href: "#" },
-      { label: "Terms", href: "#" },
-      { label: "Security", href: "#security" },
+      { label: "Features", href: "/#features" },
+      { label: "How it works", href: "/#how-it-works" },
+      { label: "Insights", href: "/#insights" },
+      { label: "Pricing", href: "/#pricing" },
+      { label: "Testimonials", href: "/#customers" },
     ],
   },
 ];

@@ -5,7 +5,9 @@ import { useContent } from "@/src/lib/content";
 
 /**
  * Site footer: brand column (logo, blurb, socials with arrow-reveal
- * hover), four link columns, bottom status bar.
+ * hover), page-navigation link columns, bottom status bar.
+ * Only working links are rendered — real app routes, home-section
+ * anchors, and external GitHub / LinkedIn profiles.
  * Content rises with a staggered reveal on entry; a top fade + hairline
  * lifts the footer off the animated page backdrop so it reads as its
  * own stage instead of merging into the background.
@@ -25,7 +27,7 @@ export function Footer() {
       />
       <div className="relative z-10 mx-auto max-w-[1400px] px-[15px] lg:px-14">
         <div className="py-16 lg:py-20">
-          <div className="grid grid-cols-2 gap-12 md:grid-cols-6 lg:gap-8">
+          <div className="grid grid-cols-2 gap-12 md:grid-cols-5 lg:gap-8">
             <Reveal offset="sm" duration={700} className="col-span-2">
             <div>
               <Link
@@ -39,6 +41,8 @@ export function Footer() {
                   aria-hidden="true"
                   width={22}
                   height={22}
+                  loading="lazy"
+                  decoding="async"
                   className="size-[22px] object-contain"
                 />
                 <span className="font-nav text-sm font-semibold tracking-[0.12em] text-foreground">
@@ -48,14 +52,16 @@ export function Footer() {
               <p className="mb-8 max-w-xs text-sm leading-relaxed text-white/50">
                 {FOOTER_BLURB}
               </p>
-              <div className="flex gap-6">
+              <div className="flex flex-wrap gap-x-6 gap-y-3">
                 {FOOTER_SOCIALS.map((social) => (
                   <a
-                    key={social}
-                    href="#"
+                    key={social.href}
+                    href={social.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
                     className="group flex items-center gap-1 text-sm text-white/40 transition-colors hover:text-white"
                   >
-                    {social}
+                    {social.label}
                     <ArrowUpRight
                       size={12}
                       aria-hidden="true"
@@ -79,21 +85,42 @@ export function Footer() {
                   {column.heading}
                 </h3>
                 <ul className="space-y-4">
-                  {column.links.map((link) => (
-                    <li key={link.label}>
-                      <a
-                        href={link.href}
-                        className="inline-flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-white"
-                      >
-                        {link.label}
-                        {link.badge && (
-                          <span className="rounded-full bg-white px-2 py-0.5 text-xs text-black">
-                            {link.badge}
-                          </span>
+                  {column.links.map((link) => {
+                    const isExternal = /^https?:\/\//.test(link.href);
+                    const isHashLink = link.href.includes("#");
+                    return (
+                      <li key={link.label}>
+                        {isExternal || isHashLink ? (
+                          <a
+                            href={link.href}
+                            {...(isExternal
+                              ? { target: "_blank", rel: "noreferrer noopener" }
+                              : {})}
+                            className="inline-flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-white"
+                          >
+                            {link.label}
+                            {link.badge && (
+                              <span className="rounded-full bg-white px-2 py-0.5 text-xs text-black">
+                                {link.badge}
+                              </span>
+                            )}
+                          </a>
+                        ) : (
+                          <Link
+                            to={link.href}
+                            className="inline-flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-white"
+                          >
+                            {link.label}
+                            {link.badge && (
+                              <span className="rounded-full bg-white px-2 py-0.5 text-xs text-black">
+                                {link.badge}
+                              </span>
+                            )}
+                          </Link>
                         )}
-                      </a>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
               </Reveal>
