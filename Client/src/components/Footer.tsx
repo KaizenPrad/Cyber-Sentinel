@@ -27,7 +27,7 @@ export function Footer() {
       />
       <div className="relative z-10 mx-auto max-w-[1400px] px-[15px] lg:px-14">
         <div className="py-16 lg:py-20">
-          <div className="grid grid-cols-2 gap-12 md:grid-cols-5 lg:gap-8">
+          <div className="grid grid-cols-2 gap-12 sm:grid-cols-3 lg:grid-cols-5 lg:gap-8 [&>*]:min-w-0">
             <Reveal offset="sm" duration={700} className="col-span-2">
             <div>
               <Link

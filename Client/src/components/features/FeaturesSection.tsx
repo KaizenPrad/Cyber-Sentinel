@@ -15,7 +15,7 @@ const MINI_ICONS: Record<string, LucideIcon> = {
 function MiniRows() {
   const { FEATURE_MINI_ROWS } = useContent();
   return (
-    <div className="mx-0 mt-12 grid gap-8 md:grid-cols-3 lg:mx-5 lg:gap-12">
+    <div className="mx-0 mt-12 grid gap-8 sm:grid-cols-2 lg:mx-5 lg:grid-cols-3 lg:gap-12">
       {FEATURE_MINI_ROWS.map((row) => {
         const Icon = MINI_ICONS[row.icon] ?? Sparkles;
         return (

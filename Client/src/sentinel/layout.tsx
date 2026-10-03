@@ -56,7 +56,7 @@ export function SentinelHeader() {
         aria-label="Primary"
         className={`relative mx-auto w-full max-w-[1600px] px-4 font-nav transition-all duration-500 ease-out sm:px-8 lg:px-14 ${
           scrolled
-            ? "rounded-2xl border border-white/10 bg-[#1c1c1e]/70 shadow-[0_8px_32px_rgb(0,0,0,0.45)] backdrop-blur-2xl backdrop-saturate-150 lg:w-[calc(100%-5rem)]"
+            ? "rounded-2xl border border-white/10 bg-[#1c1c1e]/90 shadow-[0_8px_32px_rgb(0,0,0,0.45)] backdrop-blur-none md:bg-[#1c1c1e]/70 md:backdrop-blur-2xl md:backdrop-saturate-150 lg:w-[calc(100%-5rem)]"
             : "rounded-2xl border border-transparent bg-transparent backdrop-blur-none lg:w-[calc(100%-3.5rem)]"
         } before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-px before:bg-foreground/10 before:transition-opacity before:duration-500 after:absolute after:inset-x-0 after:bottom-0 after:z-10 after:h-px after:bg-foreground/10 after:transition-opacity after:duration-500 ${
           scrolled ? "before:opacity-0 after:opacity-0" : "before:opacity-100 after:opacity-100"
@@ -67,7 +67,7 @@ export function SentinelHeader() {
         <CornerMark tone="z-20" className={`bottom-0 left-0 -translate-x-1/2 translate-y-1/2 transition-opacity duration-500 ${scrolled ? "opacity-0" : "opacity-100"}`} />
         <CornerMark tone="z-20" className={`right-0 bottom-0 translate-x-1/2 translate-y-1/2 transition-opacity duration-500 ${scrolled ? "opacity-0" : "opacity-100"}`} />
         <div
-          className={`flex items-center justify-between transition-all duration-500 ease-out ${
+          className={`flex min-w-0 items-center justify-between transition-all duration-500 ease-out ${
             scrolled ? "h-10 px-3" : "h-12 px-5"
           }`}
         >
@@ -80,7 +80,7 @@ export function SentinelHeader() {
               // route change below resets scroll via ScrollToTop.
               if (pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="relative z-30 inline-flex cursor-pointer items-center gap-2 rounded-sm transition-all duration-500 hover:opacity-80"
+            className="relative z-30 inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-sm transition-all duration-500 hover:opacity-80"
           >
             <img
               src="/Cyberlogo/hourglass-mark.png"
@@ -88,6 +88,8 @@ export function SentinelHeader() {
               aria-hidden="true"
               width={22}
               height={22}
+              fetchPriority="high"
+              decoding="async"
               className={`object-contain transition-all duration-500 ${
                 scrolled ? "size-[18px]" : "size-[22px]"
               }`}
@@ -101,14 +103,14 @@ export function SentinelHeader() {
             </span>
           </Link>
 
-          <div className={`hidden items-center md:flex ${scrolled ? "gap-6" : "gap-7"}`}>
+          <div className={`hidden min-w-0 items-center lg:flex ${scrolled ? "gap-5 xl:gap-6" : "gap-5 xl:gap-7"}`}>
             {LINKS.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.to === "/"}
                 className={({ isActive }) =>
-                  `nav-link group text-[15px] transition-all duration-500 ${scrolled ? "py-1 text-sm" : "py-3"} ${isActive ? "nav-link-active text-white" : ""}`
+                  `nav-link group shrink-0 whitespace-nowrap text-sm transition-all duration-500 xl:text-[15px] ${scrolled ? "py-1" : "py-3"} ${isActive ? "nav-link-active text-white" : ""}`
                 }
               >
                 {({ isActive }) => (
@@ -130,7 +132,7 @@ export function SentinelHeader() {
             ))}
           </div>
 
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden shrink-0 items-center gap-3 lg:flex">
             {user ? (
               <UserMenu scrolled={scrolled} />
             ) : (
@@ -149,16 +151,16 @@ export function SentinelHeader() {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             onClick={() => setOpen((value) => !value)}
-            className="rounded-sm p-2.5 text-white transition-colors duration-300 hover:text-white md:hidden"
+            className="rounded-sm p-2.5 text-white transition-colors duration-300 hover:text-white lg:hidden"
           >
             {open ? <X className="h-6 w-6" aria-hidden="true" /> : <Menu className="h-6 w-6" aria-hidden="true" />}
           </button>
         </div>
 
         <div
-          className={`mx-4 overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:hidden ${
+          className={`mx-4 overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden ${
             open
-              ? "max-h-[36rem] translate-y-0 opacity-100"
+              ? "max-h-[70vh] translate-y-0 overflow-y-auto opacity-100"
               : "pointer-events-none max-h-0 -translate-y-3 opacity-0"
           }`}
         >

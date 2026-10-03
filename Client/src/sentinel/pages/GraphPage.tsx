@@ -1,5 +1,5 @@
 import { Maximize, Minus, Plus } from "lucide-react";
-import { Network } from "vis-network";
+import type { Network } from "vis-network";
 import { useEffect, useRef, useState } from "react";
 import { SectionHeader } from "@/src/components/SectionHeader";
 import { fetchGraph } from "../api";
@@ -52,7 +52,17 @@ export function GraphPage() {
 
   useEffect(() => {
     if (!graph || !containerRef.current) return;
-    const nodes = graph.nodes.map((n) => {
+    let cancelled = false;
+    const gw = typeof globalThis !== "undefined" ? globalThis.window : undefined;
+    const isMobile =
+      typeof gw !== "undefined" &&
+      (gw.innerWidth < 768 ||
+        (typeof gw.matchMedia === "function" &&
+          gw.matchMedia("(pointer: coarse)").matches));
+    // Cap nodes on phones: 300+ node physics is what janks mobile.
+    const capped = isMobile ? graph.nodes.slice(0, 120) : graph.nodes;
+    const ids = new Set(capped.map((n) => n.id));
+    const nodes = capped.map((n) => {
       const color = NODE_COLOR[n.type] ?? "#ecebe7";
       const hot = n.risk >= 70;
       return {
@@ -76,71 +86,88 @@ export function GraphPage() {
           size: hot ? 14 : 13,
           face: "Inter, system-ui, sans-serif",
         },
-        shadow: hot
-          ? { enabled: true, color: withAlpha(color, 0.55), size: 14, x: 0, y: 0 }
-          : { enabled: false },
+        shadow:
+          hot && !isMobile
+            ? { enabled: true, color: withAlpha(color, 0.55), size: 14, x: 0, y: 0 }
+            : { enabled: false },
       };
     });
     // Edge signal-types live in hover tooltips, not on-canvas labels —
     // always-on labels rendered as unreadable blocks on dense graphs.
-    const edges = graph.edges.map((e) => ({
-      from: e.from,
-      to: e.to,
-      title: `<span style="font-family:monospace;font-size:12px;color:#fff">${e.label}</span>`,
-      width: 1.2,
-      hoverWidth: 2.2,
-      selectionWidth: 2.2,
-      arrows: { to: { enabled: true, scaleFactor: 0.55, type: "arrow" } },
-      smooth: { enabled: true, type: "dynamic", roundness: 0.4 },
-      color: {
-        color: "rgba(148,163,184,0.32)",
-        highlight: "rgba(255,255,255,0.75)",
-        hover: "rgba(255,255,255,0.55)",
-      },
-    }));
-    const network = new Network(
-      containerRef.current,
-      { nodes, edges },
-      {
-        physics: {
-          enabled: true,
-          solver: "barnesHut",
-          barnesHut: {
-            gravitationalConstant: -6000,
-            centralGravity: 0.28,
-            springLength: 170,
-            springConstant: 0.05,
-            damping: 0.09,
-            avoidOverlap: 0.5,
+    const edges = graph.edges
+      .filter((e) => ids.has(e.from) && ids.has(e.to))
+      .slice(0, isMobile ? 250 : 800)
+      .map((e) => ({
+        from: e.from,
+        to: e.to,
+        title: `<span style="font-family:monospace;font-size:12px;color:#fff">${e.label}</span>`,
+        width: 1.2,
+        hoverWidth: 2.2,
+        selectionWidth: 2.2,
+        arrows: { to: { enabled: true, scaleFactor: 0.55, type: "arrow" } },
+        smooth: { enabled: !isMobile, type: "dynamic", roundness: 0.4 },
+        color: {
+          color: "rgba(148,163,184,0.32)",
+          highlight: "rgba(255,255,255,0.75)",
+          hover: "rgba(255,255,255,0.55)",
+        },
+      }));
+    // Lazy-load vis-network so phones never download ~1MB of graph code
+    // until this route is actually visited.
+    const container = containerRef.current;
+    void import("vis-network").then(({ Network }) => {
+      if (cancelled || !container) return;
+      const network = new Network(
+        container,
+        { nodes, edges },
+        {
+          physics: {
+            enabled: true,
+            solver: "barnesHut",
+            barnesHut: {
+              gravitationalConstant: -6000,
+              centralGravity: 0.28,
+              springLength: 170,
+              springConstant: 0.05,
+              damping: 0.09,
+              avoidOverlap: isMobile ? 0 : 0.5,
+            },
+            // Settle fast on every window switch, then freeze: a frozen
+            // layout stays explorable (drag/zoom/pan/click) without drifting.
+            stabilization: {
+              enabled: true,
+              iterations: isMobile ? 60 : 150,
+              updateInterval: 10,
+              fit: true,
+            },
           },
-          // Settle fast on every window switch, then freeze: a frozen
-          // layout stays explorable (drag/zoom/pan/click) without drifting.
-          stabilization: { enabled: true, iterations: 150, updateInterval: 10, fit: true },
+          interaction: {
+            hover: !isMobile,
+            hoverConnectedEdges: !isMobile,
+            tooltipDelay: 120,
+            hideEdgesOnDrag: true,
+            multiselect: false,
+            zoomView: true,
+            dragView: true,
+          },
         },
-        interaction: {
-          hover: true,
-          hoverConnectedEdges: true,
-          tooltipDelay: 120,
-          hideEdgesOnDrag: true,
-          multiselect: false,
-          zoomView: true,
-          dragView: true,
-        },
-      },
-    );
-    networkRef.current = network;
-    // Freeze the layout the moment it settles — otherwise the solver keeps
-    // nudging nodes forever and the graph never stops rotating.
-    network.once("stabilizationIterationsDone", () => {
-      network.setOptions({ physics: { enabled: false } });
-    });
-    network.on("click", (params: { nodes: string[] }) => {
-      const id = params.nodes.length > 0 ? params.nodes[0] : null;
-      setSelected(id);
-      if (id) network.focus(id, { scale: 1.05, animation: { duration: 500, easingFunction: "easeInOutQuad" } });
+      );
+      networkRef.current = network;
+      // Freeze the layout the moment it settles — otherwise the solver keeps
+      // nudging nodes forever and the graph never stops rotating.
+      network.once("stabilizationIterationsDone", () => {
+        network.setOptions({ physics: { enabled: false } });
+      });
+      network.on("click", (params: { nodes: string[] }) => {
+        const id = params.nodes.length > 0 ? params.nodes[0] : null;
+        setSelected(id);
+        if (id && !isMobile)
+          network.focus(id, { scale: 1.05, animation: { duration: 500, easingFunction: "easeInOutQuad" } });
+      });
     });
     return () => {
-      network.destroy();
+      cancelled = true;
+      networkRef.current?.destroy();
       networkRef.current = null;
     };
   }, [graph]);
@@ -216,7 +243,7 @@ export function GraphPage() {
             <div className="relative">
               <div
                 ref={containerRef}
-                className="h-[520px] w-full"
+                className="h-[360px] w-full sm:h-[440px] lg:h-[520px]"
                 role="img"
                 aria-label="Network graph"
                 style={{
@@ -250,7 +277,7 @@ export function GraphPage() {
                   <Maximize size={15} aria-hidden="true" />
                 </button>
               </div>
-              <p className="pointer-events-none absolute bottom-3 left-4 font-mono text-[11px] tracking-[0.08em] text-white/35">
+              <p className="pointer-events-none absolute bottom-3 left-4 hidden font-mono text-[11px] tracking-[0.08em] text-white/35 sm:block">
                 SCROLL TO ZOOM · DRAG TO PAN · CLICK NODE TO INSPECT
               </p>
             </div>

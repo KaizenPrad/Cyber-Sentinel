@@ -22,7 +22,7 @@ export function AssigneeChart() {
           Agent tasks per assignee
         </div>
       </div>
-      <div className="relative min-h-0 flex-1 px-4 pb-4 lg:px-5 lg:pb-5">
+      <div className="relative min-h-[260px] min-w-0 flex-1 px-4 pb-4 sm:min-h-[300px] lg:min-h-0 lg:px-5 lg:pb-5">
         <div className="absolute inset-x-4 top-3 bottom-12 flex flex-col justify-between lg:right-[1.875rem] lg:left-5 lg:top-4 lg:bottom-14">
           {TICKS.map((tick) => (
             <div
@@ -35,13 +35,13 @@ export function AssigneeChart() {
             </div>
           ))}
         </div>
-        <div className="absolute inset-x-5 top-8 bottom-14 grid grid-cols-14 items-end justify-items-center gap-1.5 lg:right-[1.875rem] lg:left-5 lg:gap-2">
+        <div className="absolute inset-x-5 top-8 bottom-14 grid grid-cols-14 items-end justify-items-center gap-1 sm:gap-1.5 lg:right-[1.875rem] lg:left-5 lg:gap-2">
           {ASSIGNEES.map((assignee) => {
             const [top, mid, bot] = segments(assignee.total);
             return (
               <div
                 key={assignee.initials}
-                className="flex h-full w-1.5 flex-col justify-end lg:w-2"
+                className="flex h-full w-1 flex-col justify-end sm:w-1.5 lg:w-2"
               >
                 <div
                   className="bg-slate-100/85"
@@ -59,7 +59,7 @@ export function AssigneeChart() {
             );
           })}
         </div>
-        <div className="absolute inset-x-5 bottom-2 grid grid-cols-14 justify-items-center gap-1.5 lg:right-[1.875rem] lg:left-5 lg:gap-2">
+        <div className="absolute inset-x-5 bottom-2 grid grid-cols-14 justify-items-center gap-1 sm:gap-1.5 lg:right-[1.875rem] lg:left-5 lg:gap-2">
           {ASSIGNEES.map((assignee) => (
             <span
               key={assignee.initials}

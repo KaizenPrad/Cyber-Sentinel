@@ -22,10 +22,10 @@ export function Hero() {
         <div className="flex flex-col items-center text-center">
           <Reveal offset="md" delay={0}>
             <h1 className="hero-title max-w-[22rem] font-display text-balance text-white sm:max-w-none">
-              <span className="block sm:whitespace-nowrap">
+              <span className="block lg:whitespace-nowrap">
                 The schedule management
               </span>
-              <span className="text-gradient-headline block sm:whitespace-nowrap">
+              <span className="text-gradient-headline block lg:whitespace-nowrap">
                 system for autonomous agents
               </span>
             </h1>
@@ -33,10 +33,10 @@ export function Hero() {
 
           <Reveal offset="sm" delay={150} duration={700}>
             <p className="relative z-0 mb-8 max-w-[22rem] text-center text-sm leading-relaxed text-white sm:mb-10 sm:max-w-none sm:text-base lg:text-lg">
-              <span className="block sm:whitespace-nowrap">
+              <span className="block lg:whitespace-nowrap">
                 Coordinate work across every system, trigger, and agent.
               </span>
-              <span className="block sm:whitespace-nowrap">
+              <span className="block lg:whitespace-nowrap">
                 Durable context keeps every run informed and in control.
               </span>
             </p>

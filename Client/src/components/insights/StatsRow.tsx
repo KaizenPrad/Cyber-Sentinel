@@ -6,7 +6,7 @@ import { useContent } from "@/src/lib/content";
 export function StatsRow() {
   const { BUDGET, INSIGHT_STATS } = useContent();
   return (
-    <div className="grid grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,1.25fr)] gap-3 lg:gap-4">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4 xl:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,1.25fr)]">
       {INSIGHT_STATS.map((stat) => (
         <div
           key={stat.label}
@@ -25,7 +25,7 @@ export function StatsRow() {
         </div>
       ))}
 
-      <div className="flex min-w-0 items-center border-l border-white/[0.07] pl-3 lg:pl-4">
+      <div className="col-span-2 flex min-w-0 items-center border-l border-white/[0.07] pl-3 lg:col-span-1 lg:pl-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <p className="text-[10px] text-white/45 lg:text-xs">Daily budget</p>

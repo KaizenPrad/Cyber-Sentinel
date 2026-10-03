@@ -41,6 +41,38 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  /* Prevent iOS rubber-band jank from repainting fixed canvases */
+  overscroll-behavior-y: none;
+}
+
+/* Skip offscreen rendering work on every platform — big scroll win */
+section,
+.card-frame {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Resize safety: grid children must be allowed to shrink instead
+   of forcing the page wider when the PC window is split or resized. */
+.grid > * {
+  min-width: 0;
+}
+
+/* Phones: kill smooth-scroll + heavy blur/shadow (main shutter culprits) */
+@media (max-width: 768px) {
+  html {
+    scroll-behavior: auto;
+  }
+  .card-frame {
+    contain-intrinsic-size: auto 400px;
+    box-shadow: none;
+  }
 }
 
 ::selection {

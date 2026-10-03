@@ -10,7 +10,7 @@ export function InsightsDashboard() {
   return (
     <section
       aria-label="Agent insights dashboard"
-      className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-white/[0.08] bg-[#101112] text-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]"
+      className="flex h-auto min-h-0 flex-col rounded-lg border border-white/[0.08] bg-[#101112] text-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] lg:h-full lg:overflow-hidden"
     >
       <header className="flex h-11 shrink-0 items-center gap-2 border-b border-white/[0.06] px-5 text-sm">
         <span className="font-medium text-white/90">Agent insights</span>
@@ -23,7 +23,7 @@ export function InsightsDashboard() {
       </header>
       <div className="grid min-h-0 flex-1 grid-rows-[auto_1fr] gap-3 p-3 lg:gap-4 lg:p-4">
         <StatsRow />
-        <div className="grid min-h-0 grid-cols-[1fr_1.02fr] gap-3 lg:gap-4">
+        <div className="grid min-h-0 grid-cols-1 gap-3 [&>*]:min-w-0 lg:gap-4 xl:grid-cols-[1fr_1.02fr]">
           <AssigneeChart />
           <ProjectsTable />
         </div>
