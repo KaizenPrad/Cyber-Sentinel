@@ -24,6 +24,12 @@ import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 // This imports cookie parsing so you can read cookies from requests.
 
+import path from 'node:path';
+// Static frontend serving in production (single-service Render deploy).
+
+import { fileURLToPath } from 'node:url';
+// Resolve repo root so Client/dist can be served regardless of cwd.
+
 import { env } from './config/env.js';
 // This imports your environment settings like the frontend URL.
 
@@ -101,6 +107,19 @@ app.use('/api/graph', graphRoutes); // this line connects graph routes
 app.use('/api/detections', detectionRoutes); // this line connects detection routes
 app.use('/api/incidents', incidentRoutes); // this line connects incident routes
 app.use('/api/reports', reportRoutes); // this line connects report routes
+
+// Serve the built React UI from the SAME service in production (like Twitter-Clone:
+// backend serves frontend/dist, single Render web service). Built via root `npm run build`.
+// Skips /api/* so unknown API routes still hit the JSON 404 below.
+if (env.nodeEnv === 'production') { // only in production, dev keeps Vite :5173 + proxy
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..'); // backend/src -> repo root
+  const dist = path.join(repoRoot, 'Client', 'dist'); // vite build output (case-sensitive on Render)
+  app.use(express.static(dist)); // serve js/css/assets
+  app.get('*', (req, res, next) => { // SPA fallback for React Router
+    if (req.path.startsWith('/api')) return next(); // let API 404 handler answer
+    res.sendFile(path.join(dist, 'index.html')); // boot the React app
+  });
+}
 
 app.use(notFound);// this line catches unknown URLs and returns 404
 app.use(errorHandler); // this line catches server errors and returns a clean message
