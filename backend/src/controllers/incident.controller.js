@@ -87,6 +87,15 @@ export const getIncident = asyncHandler(async (req, res) => {
 // This is the updateIncident function that updates an incident
 export const updateIncident = asyncHandler(async (req, res) => {
   const { status, assigneeId } = req.validated; // Here request.validated holds the checked status and assignee
+  // Assignees must belong to your organization — admins assign work to their own employees only
+  if (assigneeId !== undefined && assigneeId !== null) {
+    const member = await pool.query(
+      'SELECT id FROM users WHERE id = $1 AND organization_id = $2',
+      [assigneeId, req.user.organizationId],
+    );
+    if (member.rows.length === 0)
+      return res.status(404).json({ success: false, error: 'Assignee not found in your organization' });
+  }
   const sets = []; // this line makes an empty list for the SET parts of the update
   const params = []; // this line makes an empty list for the query values
   // If status provided, add to update

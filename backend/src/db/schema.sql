@@ -13,8 +13,16 @@ CREATE TABLE IF NOT EXISTS organizations (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT, -- unique org id, auto-generated
   name TEXT NOT NULL, -- display name like Demo SOC
   slug TEXT UNIQUE NOT NULL, -- URL-friendly unique name like demo-soc-abc123
+  invite_code TEXT UNIQUE, -- join code an OWNER/ADMIN shares so employees register into this org
   created_at TIMESTAMPTZ DEFAULT NOW() -- when the org was created
 );
+-- Backfill for databases created before invite_code existed.
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS invite_code TEXT;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'organizations_invite_code_key') THEN
+    ALTER TABLE organizations ADD CONSTRAINT organizations_invite_code_key UNIQUE (invite_code);
+  END IF;
+END $$;
 
 -- Users table: one row per login account, linked to its home org.
 CREATE TABLE IF NOT EXISTS users (

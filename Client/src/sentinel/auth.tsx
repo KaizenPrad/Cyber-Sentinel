@@ -32,6 +32,7 @@ interface AuthState {
     firstName: string;
     lastName: string;
     organizationName: string;
+    inviteCode?: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -106,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       firstName: string;
       lastName: string;
       organizationName: string;
+      inviteCode?: string;
     }) => {
       try {
         const r = await api.post("/auth/register", input);

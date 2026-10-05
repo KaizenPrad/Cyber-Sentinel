@@ -72,6 +72,11 @@ export function generateApiKey() {
   return { key: rawKey, keyHash, keyPrefix }; // this line returns the real key, its hash, and its prefix
 }
 
+// This is the generateInviteCode function that makes a short join code like CS-A1B2C3
+export function generateInviteCode() {
+  return `CS-${crypto.randomBytes(3).toString('hex').toUpperCase()}`; // 3 random bytes as uppercase hex, prefixed for readability
+}
+
 // This is the hashApiKey function that hashes a key so we can compare it later
 export function hashApiKey(key) {
   return crypto.createHash('sha256').update(key).digest('hex'); // this line hashes the given key with SHA256 and returns the hex string

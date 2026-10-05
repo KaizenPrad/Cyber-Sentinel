@@ -255,14 +255,24 @@ export async function revokeApiKey(id: string): Promise<void> {
 
 /* ---------- organization members (admin) ---------- */
 
+export type OrgRole = "OWNER" | "ADMIN" | "MEMBER" | "EMPLOYEE";
+
 export interface OrgMember {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  role: "OWNER" | "ADMIN" | "MEMBER";
+  role: OrgRole;
   lastLoginAt: string | null;
   createdAt: string;
+}
+
+export interface NewOrgMember {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: "OWNER" | "ADMIN" | "MEMBER" | "EMPLOYEE";
 }
 
 export async function fetchMembers(): Promise<OrgMember[]> {
@@ -270,7 +280,59 @@ export async function fetchMembers(): Promise<OrgMember[]> {
   return r.data.data as OrgMember[];
 }
 
-export async function updateMemberRole(id: string, role: OrgMember["role"]): Promise<OrgMember> {
+export async function createMember(input: NewOrgMember): Promise<OrgMember> {
+  const r = await api.post("/auth/members", input);
+  return r.data.data as OrgMember;
+}
+
+export async function updateMemberRole(id: string, role: OrgRole): Promise<OrgMember> {
   const r = await api.patch(`/auth/members/${id}`, { role });
   return r.data.data as OrgMember;
+}
+
+/* ---------- invite code (admin invites employees to join) ---------- */
+
+export interface InviteCode {
+  inviteCode: string;
+  organization: { id: string; name: string; slug: string };
+}
+
+export async function fetchInviteCode(): Promise<InviteCode> {
+  const r = await api.get("/auth/invite-code");
+  return r.data.data as InviteCode;
+}
+
+export async function rotateInviteCode(): Promise<InviteCode> {
+  const r = await api.post("/auth/invite-code/rotate");
+  return r.data.data as InviteCode;
+}
+
+/* ---------- workspace activity (admin watches what changes) ---------- */
+
+export interface ActivityIncident {
+  id: string;
+  title: string;
+  status: string;
+  severity: string;
+  created_at: string;
+  assignee_email: string | null;
+}
+
+export interface ActivityRemediation {
+  id: string;
+  action: string;
+  notes: string | null;
+  created_at: string;
+  author_email: string;
+  incident_title: string;
+}
+
+export interface OrgActivity {
+  incidents: ActivityIncident[];
+  remediations: ActivityRemediation[];
+}
+
+export async function fetchActivity(): Promise<OrgActivity> {
+  const r = await api.get("/auth/activity");
+  return r.data.data as OrgActivity;
 }

@@ -12,7 +12,8 @@ export const registerSchema = z.object({ // this line starts an object schema fo
   password: z.string().min(8, 'Password must be at least 8 characters'), // this line requires a password of at least 8 characters
   firstName: z.string().min(1), // this line requires a non-empty first name
   lastName: z.string().min(1), // this line requires a non-empty last name
-  organizationName: z.string().min(1), // this line requires a non-empty organization name
+  organizationName: z.string().min(1).optional(), // required only when creating a new workspace (no invite code)
+  inviteCode: z.string().trim().min(4).max(32).optional(), // join code shared by an OWNER/ADMIN to land in their org as EMPLOYEE
 });
 
 // This is the loginSchema that checks login bodies
@@ -28,5 +29,14 @@ export const memberParamsSchema = z.object({ // this line starts an object schem
 
 // This is the updateMemberRoleSchema that checks role change bodies
 export const updateMemberRoleSchema = z.object({ // this line starts an object schema for role updates
-  role: z.enum(['OWNER', 'ADMIN', 'MEMBER']), // this line allows only the three org roles
+  role: z.enum(['OWNER', 'ADMIN', 'MEMBER', 'EMPLOYEE']), // OWNER/ADMIN manage; MEMBER kept for backwards compat, EMPLOYEE is the preferred employee role
+});
+
+// This is the addMemberSchema for an OWNER/ADMIN creating a user inside their own org
+export const addMemberSchema = z.object({ // an admin adds an employee to their org — no new org is created
+  email: z.string().email(), // login email for the new member
+  password: z.string().min(8, 'Password must be at least 8 characters'), // initial password, member can change it later
+  firstName: z.string().min(1), // required first name
+  lastName: z.string().min(1), // required last name
+  role: z.enum(['OWNER', 'ADMIN', 'MEMBER', 'EMPLOYEE']).default('EMPLOYEE'), // OWNER-creatable; controller restricts OWNER grants to OWNERs
 });

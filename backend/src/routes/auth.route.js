@@ -9,17 +9,21 @@
 import { Router } from 'express';
 // The Router lets you group URLs together in one file.
 
-import { 
-  register, 
-  login, 
-  session, 
+import {
+  register,
+  login,
+  session,
   logout,
   createApiKey,
   listApiKeys,
   getApiKey,
   revokeApiKey,
   listMembers,
+  addMember,
   updateMemberRole,
+  getInviteCode,
+  rotateInviteCode,
+  getActivity,
 } from '../controllers/auth.controller.js';
 // These are controller functions that do the real auth work.
 
@@ -29,7 +33,7 @@ import { validate } from '../middleware/validate.middleware.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 // This checks the user is logged in before they can use protected routes.
 
-import { registerSchema, loginSchema, memberParamsSchema, updateMemberRoleSchema } from '../validations/auth.validation.js';
+import { registerSchema, loginSchema, memberParamsSchema, updateMemberRoleSchema, addMemberSchema } from '../validations/auth.validation.js';
 // These are validation rules for register/login data and member role changes.
 
 import { createApiKeySchema, apiKeyParamsSchema } from '../validations/sentinal.validation.js';
@@ -49,8 +53,16 @@ router.get('/api-keys', authenticate, listApiKeys); // this line lists all API k
 router.get('/api-keys/:id', authenticate, validate(apiKeyParamsSchema, 'params'), getApiKey); // this line gets one API key by id
 router.delete('/api-keys/:id', authenticate, validate(apiKeyParamsSchema, 'params'), revokeApiKey); // this line revokes an API key
 
-// Organization members (admin): list everyone, OWNER can change roles
+// Organization members (admin): list everyone, OWNER/ADMIN can add + manage roles
 router.get('/members', authenticate, listMembers); // this line lists all members of your organization
+router.post('/members', authenticate, validate(addMemberSchema), addMember); // OWNER/ADMIN adds a user into their own org
 router.patch('/members/:id', authenticate, validate(memberParamsSchema, 'params'), validate(updateMemberRoleSchema), updateMemberRole); // this line changes a member's role
+
+// Invite code: OWNER/ADMIN shares it, employees register with it to join this org
+router.get('/invite-code', authenticate, getInviteCode); // get the workspace join code
+router.post('/invite-code/rotate', authenticate, rotateInviteCode); // replace the join code
+
+// Workspace activity: latest incidents + remediation actions in your org
+router.get('/activity', authenticate, getActivity); // admin watches what changes
 
 export default router; // this line exports the router so app.js can use it
