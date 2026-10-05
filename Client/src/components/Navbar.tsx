@@ -44,6 +44,8 @@ export function Navbar() {
               <img
                 src="/Cyberlogo/hourglass-mark.png"
                 alt="CyberSentinel"
+                loading="lazy"
+                decoding="async"
                 className="size-4 object-contain transition-all duration-500"
               />
             </span>

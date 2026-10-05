@@ -29,6 +29,13 @@ export function ReportPage() {
   const [loading, setLoading] = useState(true);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
+  // Recharts animations jank on phones — render static charts there.
+  const reduceAnim =
+    typeof window !== "undefined" &&
+    (window.innerWidth < 768 ||
+      (typeof window.matchMedia === "function" &&
+        (window.matchMedia("(pointer: coarse)").matches ||
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches)));
 
   const load = (s: string, e: string) => {
     setLoading(true);
@@ -63,6 +70,8 @@ export function ReportPage() {
           alt=""
           width={24}
           height={24}
+          loading="lazy"
+          decoding="async"
           className="size-6 object-contain"
         />
         <span className="font-nav text-sm font-semibold tracking-[0.12em] text-foreground">
@@ -109,7 +118,7 @@ export function ReportPage() {
                     <XAxis dataKey="name" tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} interval={0} angle={-15} dy={10} height={50} />
                     <YAxis tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} allowDecimals={false} />
                     <Tooltip contentStyle={{ background: "#0a0a0c", border: "1px solid rgba(255,255,255,0.12)", fontSize: 12 }} />
-                    <Bar dataKey="count" fill="#00d2ef" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="count" fill="#00d2ef" radius={[4, 4, 0, 0]} isAnimationActive={!reduceAnim} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -126,6 +135,7 @@ export function ReportPage() {
                       innerRadius={55}
                       outerRadius={85}
                       stroke="none"
+                      isAnimationActive={!reduceAnim}
                     >
                       {(report.bySeverity ?? []).map((_, i) => (
                         <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Reveal } from "@/src/components/Reveal";
 import { SectionHeader } from "@/src/components/SectionHeader";
 import { fetchSignals } from "../api";
@@ -27,6 +27,15 @@ export function MonitorPage() {
   const [minRisk, setMinRisk] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Debounce the search box: typing shouldn't fire an API call per keystroke
+  // on phones (slow networks + re-render jank).
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => clearTimeout(id);
+  }, [search]);
+  const filtersRef = useRef({ severity, category, search: debouncedSearch, minRisk });
+  filtersRef.current = { severity, category, search: debouncedSearch, minRisk };
 
   const load = useCallback(
     async (p: number, sev: string, cat: string, q: string, risk: number) => {
@@ -54,17 +63,25 @@ export function MonitorPage() {
 
   useEffect(() => {
     // Always reload with the CURRENT filters (never hardcoded empties),
-    // then keep page 1 live every 5 seconds with those same filters.
-    void load(page, severity, category, search, minRisk);
+    // then keep page 1 live every 5s (10s on phones) with those same filters.
+    const isMobile =
+      typeof window !== "undefined" &&
+      (window.innerWidth < 768 ||
+        (typeof window.matchMedia === "function" &&
+          window.matchMedia("(pointer: coarse)").matches));
+    void load(page, severity, category, debouncedSearch, minRisk);
     const id = setInterval(() => {
       setPage((p) => {
-        if (p === 1 && !document.hidden) void load(1, severity, category, search, minRisk);
+        if (p === 1 && !document.hidden) {
+          const f = filtersRef.current;
+          void load(1, f.severity, f.category, f.search, f.minRisk);
+        }
         return p;
       });
-    }, 5000);
+    }, isMobile ? 10000 : 5000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [load, page, severity, category, search, minRisk]);
+  }, [load, page, severity, category, debouncedSearch, minRisk]);
 
   const apply = (p: number, sev: string, cat: string, q: string, risk: number) => {
     setPage(p);

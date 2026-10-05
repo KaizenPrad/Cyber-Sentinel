@@ -95,6 +95,8 @@ export function SchedulerSidebar({
             src="/Cyberlogo/hourglass-mark.png"
             alt=""
             aria-hidden="true"
+            loading="lazy"
+            decoding="async"
             className="size-5 shrink-0 rounded-sm object-contain"
           />
           <span className="truncate text-sm">CyberSentinel</span>

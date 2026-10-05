@@ -2,19 +2,33 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta
       name="description"
       content="CyberSentinel — AI cyber threat detection: behavioral monitoring, correlation, risk scoring, incidents."
     />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="icon" type="image/png" sizes="64x64" href="/Cyberlogo/hourglass-favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/Cyberlogo/apple-touch-icon.png" />
+    <!-- Preload the small brand mark so header paints instantly on phones -->
+    <link rel="preload" as="image" href="/Cyberlogo/hourglass-mark.png" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- display=swap + text subset keeps mobile first-paint fast, no FOIT -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap&text=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <meta name="theme-color" content="#000000" />
     <title>CyberSentinel — AI Cyber Threat Detection</title>
   </head>

@@ -43,6 +43,13 @@ export function ParticleField({
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
+    const isMobile =
+      window.innerWidth < 768 ||
+      (typeof window.matchMedia === "function" &&
+        window.matchMedia("(pointer: coarse)").matches &&
+        window.innerWidth < 1024);
+    const count = isMobile ? Math.min(particles, 60) : particles;
+
     const baseAlpha = opacity / 100;
     const horizonAlpha = horizonOpacity / 100;
     const speedBase = riseSpeed / 60;
@@ -59,7 +66,7 @@ export function ParticleField({
     let height = 0;
 
     const seed = () => {
-      dots = Array.from({ length: particles }, () => ({
+      dots = Array.from({ length: count }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
         radius: 0.4 + Math.random() * ((scale / 8) * 1.4),
@@ -93,7 +100,7 @@ export function ParticleField({
 
     const resize = () => {
       const rect = parent.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2);
       width = rect.width;
       height = rect.height;
       canvas.width = Math.floor(width * dpr);
@@ -102,8 +109,12 @@ export function ParticleField({
       seed();
     };
 
-    const tick = () => {
-      frame += 1;
+    let lastTick = 0;
+    const tick = (now: number = 0) => {
+      frame = requestAnimationFrame(tick);
+      if (isMobile && now - lastTick < 33) return;
+      lastTick = now;
+      if (document.hidden) return;
       context.clearRect(0, 0, width, height);
       for (const dot of dots) {
         dot.y -= dot.speed;
@@ -114,7 +125,6 @@ export function ParticleField({
       }
       paintDots(true);
       paintHorizon();
-      frame = requestAnimationFrame(tick);
     };
 
     resize();

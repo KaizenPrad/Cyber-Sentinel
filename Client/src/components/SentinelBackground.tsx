@@ -86,6 +86,24 @@ const TAU = Math.PI * 2;
 const PX_PER_WORLD = 60;
 const CURVE_SAMPLES = 1024;
 const STRAND_SEGMENTS = 400;
+const STRAND_SEGMENTS_MOBILE = 140;
+
+/** True on phones / low-power devices: fewer strands, no AA, DPR 1. */
+function isMobileGPU(): boolean {
+  if (typeof window === "undefined" || typeof navigator === "undefined") return false;
+  const coarse =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(pointer: coarse)").matches;
+  const narrow = window.innerWidth < 768;
+  const cores =
+    typeof navigator.hardwareConcurrency === "number"
+      ? navigator.hardwareConcurrency
+      : 8;
+  const lowRam =
+    typeof (navigator as Navigator & { deviceMemory?: number }).deviceMemory === "number" &&
+    ((navigator as Navigator & { deviceMemory?: number }).deviceMemory as number) <= 4;
+  return (coarse && narrow) || (narrow && (cores <= 4 || lowRam));
+}
 const WOBBLE = 0.008;
 const FADE_ZONE = 0.15;
 const FORM_HEIGHT = 10;
@@ -389,14 +407,34 @@ export function SentinelBackground({ tuning }: { tuning?: Partial<VortexTuning> 
       typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    const mobile = isMobileGPU();
+    // Phones get a lite vortex: ~1/3 strands + dots, no mouse repel.
+    const mobileTuning: Partial<VortexTuning> = mobile
+      ? {
+          lineCount: 90,
+          dotCount: 1500,
+          cometCount: 4,
+          cometTail: 10,
+          hoverRepel: false,
+          repelStrength: 0,
+          dotGlow: 6,
+          lineGlow: 8,
+        }
+      : {};
+    const strandSegments = mobile ? STRAND_SEGMENTS_MOBILE : STRAND_SEGMENTS;
+
     const cfgRef = {
-      current: resolveConfig(tuning ?? {}, !prefersReducedMotion),
+      current: resolveConfig({ ...mobileTuning, ...(tuning ?? {}) }, !prefersReducedMotion),
     };
 
     // ---------------- Renderer / scene ----------------
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: !mobile,
+      alpha: true,
+      powerPreference: mobile ? "low-power" : "high-performance",
+    });
     renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1 : 1.5));
     renderer.toneMapping = THREE.ReinhardToneMapping;
     renderer.toneMappingExposure = 1.25;
     renderer.domElement.style.display = "block";
@@ -527,7 +565,7 @@ export function SentinelBackground({ tuning }: { tuning?: Partial<VortexTuning> 
       syncColors(cfg);
 
       const count = Math.max(3, Math.round(cfg.lineCount));
-      const segs = STRAND_SEGMENTS - 1;
+      const segs = strandSegments - 1;
       const verts = count * segs * 2;
       strandPos = new Float32Array(verts * 3);
       strandCol = new Float32Array(verts * 3);
@@ -560,8 +598,8 @@ export function SentinelBackground({ tuning }: { tuning?: Partial<VortexTuning> 
           to: 1,
           bright: 0.5,
           offset: i * segs * 2 * 3,
-          pts: new Float32Array(STRAND_SEGMENTS * 3),
-          cols: new Float32Array(STRAND_SEGMENTS * 3),
+          pts: new Float32Array(strandSegments * 3),
+          cols: new Float32Array(strandSegments * 3),
         });
       }
 
@@ -849,8 +887,9 @@ export function SentinelBackground({ tuning }: { tuning?: Partial<VortexTuning> 
       const reach = strand.from + entrance * (strand.to - strand.from);
       const tipFade = 0.15 * (strand.to - strand.from);
       const { pts, cols } = strand;
-      for (let i = 0; i < STRAND_SEGMENTS; i++) {
-        const u = i / (STRAND_SEGMENTS - 1);
+      const total = pts.length / 3;
+      for (let i = 0; i < total; i++) {
+        const u = i / (total - 1);
         const s = strand.from + u * (strand.to - strand.from);
         const at = i * 3;
         shape.writePoint(pts, at, s, strand.lane, spin, WOBBLE, strand.wobblePhase, now);
@@ -875,7 +914,7 @@ export function SentinelBackground({ tuning }: { tuning?: Partial<VortexTuning> 
         cols[at + 2] = tint.strand.b * v;
       }
       let wpos = strand.offset;
-      for (let i = 0; i < STRAND_SEGMENTS - 1; i++) {
+      for (let i = 0; i < total - 1; i++) {
         const a = i * 3;
         const b = (i + 1) * 3;
         strandPos[wpos] = pts[a];
@@ -1092,7 +1131,8 @@ export function SentinelBackground({ tuning }: { tuning?: Partial<VortexTuning> 
       }
       for (const comet of cometList) driveComet(comet, t, dt, fadeComet);
       tick++;
-      if (tick % 2 === 0 && dotCount > 0) collide(t);
+      const collideEvery = mobile ? 6 : 2;
+      if (tick % collideEvery === 0 && dotCount > 0) collide(t);
       applyScrollParallax();
       renderer.render(scene, camera);
     }
@@ -1116,13 +1156,26 @@ export function SentinelBackground({ tuning }: { tuning?: Partial<VortexTuning> 
       born = 0;
       lastTime = performance.now();
       let elapsed = 0;
+      let lastFrame = 0;
       const step = (nowMs: number) => {
         if (disposed) return;
         raf = requestAnimationFrame(step);
         const cfg = cfgRef.current;
         const dt = Math.min((nowMs - lastTime) / 1000, 0.04);
         lastTime = nowMs;
-        if (!cfg.running) {
+        // Phones: cap at ~30fps — halves GPU work, still looks smooth.
+        if (mobile && nowMs - lastFrame < 33) {
+          applyScrollParallax();
+          return;
+        }
+        lastFrame = nowMs;
+        // Fully faded out (scrolled past hero)? Skip WebGL work entirely.
+        const vh = window.innerHeight || 1;
+        if (smoothScroll > vh * 1.35) {
+          applyScrollParallax();
+          return;
+        }
+        if (document.hidden || !cfg.running) {
           applyScrollParallax();
           renderer.render(scene, camera);
           return;

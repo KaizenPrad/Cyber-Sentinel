@@ -33,6 +33,8 @@ export function UserAvatar({
         src={user.avatarUrl}
         alt={`${getDisplayName(user)}'s profile photo`}
         referrerPolicy="no-referrer"
+        loading="lazy"
+        decoding="async"
         className={`rounded-full border border-white/15 object-cover ${className}`}
       />
     );

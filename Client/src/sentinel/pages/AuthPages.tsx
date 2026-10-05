@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { Reveal } from "@/src/components/Reveal";
 import { StarButton } from "@/src/components/StarButton";
 import { useAuth } from "../auth";
@@ -10,6 +11,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -43,7 +45,24 @@ export function LoginPage() {
           </div>
           <div>
             <label className={labelCls} htmlFor="login-pass">PASSWORD</label>
-            <input id="login-pass" type="password" required className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} />
+            <div className="relative">
+              <input
+                id="login-pass"
+                type={showPassword ? "text" : "password"}
+                required
+                className={`${inputCls} pr-12`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex items-center pr-4 text-white/50 transition-colors hover:text-white"
+              >
+                {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+              </button>
+            </div>
           </div>
           {error ? <p className="text-base text-[#ffa3a3]">{error}</p> : null}
           <StarButton size="md" type="submit" disabled={busy} className="w-full">
@@ -62,6 +81,7 @@ export function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "", firstName: "", lastName: "", organizationName: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -116,7 +136,25 @@ export function RegisterPage() {
           </div>
           <div>
             <label className={labelCls} htmlFor="reg-pass">PASSWORD · MIN 8</label>
-            <input id="reg-pass" type="password" required minLength={8} className={inputCls} value={form.password} onChange={set("password")} />
+            <div className="relative">
+              <input
+                id="reg-pass"
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={8}
+                className={`${inputCls} pr-12`}
+                value={form.password}
+                onChange={set("password")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex items-center pr-4 text-white/50 transition-colors hover:text-white"
+              >
+                {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+              </button>
+            </div>
           </div>
           {error ? <p className="text-base text-[#ffa3a3]">{error}</p> : null}
           <StarButton size="md" type="submit" disabled={busy} className="w-full">

@@ -40,11 +40,15 @@ export function HeroBackground() {
     let width = 0;
     let height = 0;
 
+    const isMobile =
+      window.innerWidth < 768 ||
+      (typeof window.matchMedia === "function" &&
+        window.matchMedia("(pointer: coarse)").matches);
+
     const seed = () => {
-      const count = Math.min(
-        160,
-        Math.max(50, Math.floor((width * height) / 12000)),
-      );
+      const count = isMobile
+        ? Math.min(60, Math.max(20, Math.floor((width * height) / 30000)))
+        : Math.min(160, Math.max(50, Math.floor((width * height) / 12000)));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -58,7 +62,7 @@ export function HeroBackground() {
 
     const resize = () => {
       const rect = parent.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2);
       width = rect.width;
       height = rect.height;
       canvas.width = Math.floor(width * dpr);
@@ -67,8 +71,12 @@ export function HeroBackground() {
       seed();
     };
 
-    const paint = () => {
-      frame += 1;
+    let lastPaint = 0;
+    const paint = (now: number = 0) => {
+      frame = requestAnimationFrame(paint);
+      if (isMobile && now - lastPaint < 33) return;
+      lastPaint = now;
+      if (document.hidden) return;
       context.clearRect(0, 0, width, height);
       for (const particle of particles) {
         particle.y -= particle.speed;
@@ -85,7 +93,6 @@ export function HeroBackground() {
         context.fillStyle = hexToRgba(colors.particle, twinkle);
         context.fill();
       }
-      frame = requestAnimationFrame(paint);
     };
 
     const paintOnce = () => {
